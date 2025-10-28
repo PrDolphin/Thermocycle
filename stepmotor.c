@@ -22,7 +22,7 @@
 #define ACCELERATION_STEP 1
 #endif // ACCELERATION_STEP
 
-#define TARGET_SPEED 150
+#define TARGET_SPEED 300
 
 uint16_t motor_intervals[STEPMOTOR_Q];
 uint32_t motor_constants[STEPMOTOR_Q];

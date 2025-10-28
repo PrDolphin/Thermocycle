@@ -19,10 +19,12 @@
 #define ACCELERATION_STEP_TIME (F_CPU / 1000) // Every 1 ms
 
 uint32_t cycle_start;
+uint32_t relay_start;
+
 uint8_t current_cycle = NUMBER_CYCLES;
 void setup() {
-  //Serial.begin(9600); // Подключаем монитор
-  //Serial.setTimeout(5);
+  // Serial.begin(9600); // Подключаем монитор
+  // Serial.setTimeout(5);
 // Вычисление коэффициентов
   motor_constants[0] = (F_CPU * 60.0) / (PRESCALER * MICROSTEP * 2 * C1);
   pinMode(SWITCH_PIN, INPUT_PULLUP);
@@ -43,10 +45,14 @@ bool direction = 1;
 extern uint16_t motor_intervals[STEPMOTOR_Q];
 // Throwaway code down here. Should do it as a prototype
 void loop() {  
-  //delay(100);
+  if (millis() - relay_start >= CYCLE_TIME_MS){
+    //Serial.println("Breakdown relay");
+    digitalWrite(RELAY_PIN1, 0);
+    digitalWrite(RELAY_PIN2, 0);
+  }
   if ((digitalRead(SWITCH_PIN) != 0) ) {
-    cycle_start = millis();
     current_cycle = 0;
+    cycle_start = millis();
     //Serial.println("STOP");
     return;
   }
@@ -55,7 +61,7 @@ void loop() {
     return;
   }
   //Serial.println("Start");
-  if ((millis() - cycle_start < CYCLE_TIME_MS)) {
+  if (millis() - cycle_start < CYCLE_TIME_MS) {
     return;
   }
   direction = !direction;
@@ -83,6 +89,6 @@ void loop() {
   digitalWrite(RELAY_PIN2, !direction);
   ++current_cycle;
   //Serial.print("Cycle number: "); Serial.println(current_cycle);
-  cycle_start = millis();
+  relay_start = cycle_start = millis();
 
 }
