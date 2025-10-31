@@ -5,6 +5,10 @@
 #define STEPMOTOR_Q 1
 #endif // STEPMOTOR_Q
 
+#ifndef MINSPEED
+#define MINSPEED 10
+#endif // MINSPEED
+
 #if STEPMOTOR_Q < 0 || STEPMOTOR_Q > 2
 #error "Disallowed motors count"
 #endif
@@ -17,6 +21,7 @@ extern uint32_t motor_constants[STEPMOTOR_Q];
 extern volatile uint32_t motor_steps[STEPMOTOR_Q];
 void motors_init();
 uint8_t accelerate();
+void emergency_stop();
 
 #ifdef __cplusplus
 }

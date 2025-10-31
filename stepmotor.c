@@ -15,9 +15,6 @@
 #define ENA_PIN (1 << 0)
 #endif
 
-#ifndef MINSPEED
-#define MINSPEED 10
-#endif // MINSPEED
 #ifndef ACCELERATION_STEP
 #define ACCELERATION_STEP 1
 #endif // ACCELERATION_STEP
@@ -112,6 +109,12 @@ uint8_t accelerate() {
   memcpy(motor_intervals, local_intervals, sizeof(motor_intervals));
   SREG = sreg;
   return 1;
+}
+
+void emergency_stop () {
+  TCCR1A &= ~((1 << COM1A0) | (1 << COM1B0));
+  memset(motor_steps, 0, sizeof(motor_steps));
+  memset(motor_intervals, UINT8_MAX, sizeof(motor_intervals));
 }
 
 ISR(TIMER1_COMPA_vect) {
