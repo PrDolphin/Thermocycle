@@ -18,7 +18,7 @@
 #define CYCLE_TIME_MS 5000
 // 128000 == 81 mm
 #define CYCLE_LENGTH_STEPS (uint32_t)268642
-#define ENDBUTTON_OFFSET (uint32_t)10000
+#define ENDBUTTON_OFFSET (uint32_t)60000
 #define NUMBER_CYCLES 10
 
 #define ACCELERATION_STEP_TIME (F_CPU / 1000) // Every 1 ms
@@ -61,6 +61,7 @@ void calibrate_position () {
   cli();
   memset(motor_steps, UINT8_MAX, sizeof(motor_steps));
   sei();
+  cycles_disp.displayByte(_empty, _P, _O, _S);
   accelerate();
   while (digitalRead(ENDBUTTON_PIN)) {
     if (!digitalRead(ESTOP_PIN))
@@ -77,8 +78,10 @@ void calibrate_position () {
   }
   motor_steps[0] = ENDBUTTON_OFFSET;
   sei();
+  cycles_disp.displayByte(_N, _U, _L, _L);
   digitalWrite(DIR_PIN, 0);
   move_blocking();
+  cycles_disp.displayInt(5);
 }
 
 void setup() {
@@ -96,7 +99,8 @@ void setup() {
   pinMode(DISP_DIO_PIN, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(ESTOP_PIN), disable_system_isr, FALLING);
   motors_init();
-  cycles_disp.displayInt(0);
+  cycles_disp.clear();
+  cycles_disp.brightness(7);
   cycle_start = millis();
   calibrate_position();
   //Serial.println("Ready");
@@ -117,17 +121,14 @@ void loop() {
     current_cycle = 0;
     cycles_disp.displayInt(0);
     system_enabled = false;
-    digitalWrite(RELAY_PIN1, 0);
-    digitalWrite(RELAY_PIN2, 0);
     //Serial.println("STOP");
-    return;
   }
   if (millis() - cycle_start < CYCLE_TIME_MS) {
     return;
   }
   digitalWrite(RELAY_PIN1, 0);
   digitalWrite(RELAY_PIN2, 0);
-  if (current_cycle >= NUMBER_CYCLES) {
+  if (!system_enabled || current_cycle >= NUMBER_CYCLES) {
     //Serial.println("Max CYCLE");
     return;
   }
@@ -139,10 +140,10 @@ void loop() {
   motor_steps[0] = CYCLE_LENGTH_STEPS;
   sei();
   move_blocking();
-  if (!digitalRead(ESTOP_PIN))
-    return;
   ++current_cycle;
   cycles_disp.displayInt(current_cycle);
+  if (!digitalRead(ESTOP_PIN))
+    return;
   digitalWrite(RELAY_PIN1, direction);
   digitalWrite(RELAY_PIN2, !direction);
   cycle_start = millis();
