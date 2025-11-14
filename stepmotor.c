@@ -19,13 +19,12 @@
 #define ACCELERATION_STEP 1
 #endif // ACCELERATION_STEP
 
-#define TARGET_SPEED 300
-
 uint16_t motor_intervals[STEPMOTOR_Q];
 uint32_t motor_constants[STEPMOTOR_Q];
 volatile uint32_t motor_steps[STEPMOTOR_Q] = {0};
 uint32_t motor_accel_steps[STEPMOTOR_Q] = {0};
 static uint16_t current_speed = 0;
+uint16_t target_speed;
 
 void motors_init() {
   memset(motor_intervals, UINT8_MAX, sizeof(motor_intervals));
@@ -87,8 +86,8 @@ uint8_t accelerate() {
       return;
     current_speed -= ACCELERATION_STEP;
   } else {
-    if (current_speed >= TARGET_SPEED) {
-      if (current_speed == TARGET_SPEED) {
+    if (current_speed >= target_speed) {
+      if (current_speed == target_speed) {
         // By one errors are not critical here
         motor_accel_steps[0] = (motor_accel_steps[0] * 2) - motor_steps[0];
 #if STEPMOTOR_Q == 2

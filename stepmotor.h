@@ -19,6 +19,7 @@ extern "C" {
 
 extern uint32_t motor_constants[STEPMOTOR_Q];
 extern volatile uint32_t motor_steps[STEPMOTOR_Q];
+extern uint16_t target_speed;
 void motors_init();
 uint8_t accelerate();
 void emergency_stop();
